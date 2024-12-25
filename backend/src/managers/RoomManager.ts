@@ -8,7 +8,6 @@ interface Room {
   user1: User;
   user2: User;
 }
-
 export class RoomManager {
   private rooms: Map<string, Room>;
 
@@ -19,18 +18,18 @@ export class RoomManager {
   // Here a room is created with 2 users
   createRoom(user1: User, user2: User) {
     const roomId = this.generate().toString();
-    this.rooms.set(roomId, {
-      roomId,
+    this.rooms.set(roomId.toString(), {
+      roomId: roomId.toString(),
       user1,
       user2,
     });
 
-    // Here the user1 is asked to give his webRTC configuration which is sdp (session description protocol)
-    user1.socket.emit("send-offer", {
+    // Here the user1 is asked to give his webRTC configuration whis is sdp (session description protocol)
+    user1?.socket.emit("send-offer", {
       roomId,
     });
 
-    user2.socket.emit("send-offer", {
+    user2?.socket.emit("send-offer", {
       roomId,
     });
   }
@@ -42,7 +41,7 @@ export class RoomManager {
     }
     const receivingUser =
       room.user1.socket.id === senderSocketid ? room.user2 : room.user1;
-    receivingUser.socket.emit("offer", {
+    receivingUser?.socket.emit("offer", {
       sdp,
       roomId,
     });
@@ -56,7 +55,7 @@ export class RoomManager {
     const receivingUser =
       room.user1.socket.id === senderSocketid ? room.user2 : room.user1;
 
-    receivingUser.socket.emit("answer", {
+    receivingUser?.socket.emit("answer", {
       sdp,
       roomId,
     });
@@ -65,7 +64,7 @@ export class RoomManager {
   onIceCandidates(
     roomId: string,
     senderSocketid: string,
-    candidate: RTCIceCandidateInit, // Updated type for candidate
+    candidate: any,
     type: "sender" | "receiver"
   ) {
     const room = this.rooms.get(roomId);

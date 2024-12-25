@@ -1,13 +1,19 @@
 {
   "compilerOptions": {
-   "module": "CommonJS",
+    "module": "CommonJS",
     "target": "ES2020",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true, // Added for consistency
+    "noImplicitAny": true, // Added for stricter type checking
+    "baseUrl": "./", // Added for module resolution
+    "paths": {
+      "*": ["node_modules/*", "src/types/*"] // Added for better type resolution
+    }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"] 
+  "exclude": ["node_modules"]
 }

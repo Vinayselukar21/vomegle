@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { Card, CardContent } from "./ui/card";
 
-const SOCKET_SERVER_URL = "http://localhost:3000";
-
+// const SOCKET_SERVER_URL = "http://localhost:3000";
 const RoomPage = ({
   userName,
   localVideoTrack,
@@ -14,6 +13,7 @@ const RoomPage = ({
   localVideoTrack: MediaStreamTrack | null;
   localAudioTrack: MediaStreamTrack | null;
 }) => {
+  const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL
   //@ts-ignore
   const [socket, setSocket] = useState<Socket | null>(null);
   const [lobby, setLobby] = useState<boolean>(true);
@@ -23,9 +23,10 @@ const RoomPage = ({
   const [receivingPc, setReceivingPc] = useState<RTCPeerConnection | null>(
     null
   );
+  console.log(SOCKET_SERVER_URL);
   //@ts-ignore
   const [remoteMediaStream, setRemoteMediaStream] =
-    useState<MediaStream | null>(null);
+  useState<MediaStream | null>(null);
   //@ts-ignore
   const [remoteVideoTrack, setRemoteVideoTrack] =
     useState<MediaStreamTrack | null>(null);

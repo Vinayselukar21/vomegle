@@ -1,6 +1,6 @@
 import express from "express";
 import http from "http";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { UserManager } from "./managers/UserManager";
 const app = express();
 const port = 3000; // default port to listen
@@ -14,7 +14,7 @@ const io = new Server(server, {
 
 const userManager = new UserManager();
 
-io.on("connection", (socket) => {
+io.on("connection", (socket: Socket) => {
   // console.log("a user connected"+ socket);
   userManager.addUser("someUserName", socket);
   socket.on("disconnect", () => {

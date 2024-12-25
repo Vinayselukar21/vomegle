@@ -17,7 +17,7 @@ export class RoomManager {
 
   // Here a room is created with 2 users
   createRoom(user1: User, user2: User) {
-    const roomId = this.generate();
+    const roomId = this.generate().toString();
     this.rooms.set(roomId.toString(), {
       roomId: roomId.toString(),
       user1,
@@ -28,24 +28,52 @@ export class RoomManager {
     user1?.socket.emit("send-offer", {
       roomId,
     });
-  }
 
-  // this function sends the offer to the other user which is user2 in this case
-  onOffer(roomId: string, sdp: string) {
-    const user2 = this.rooms.get(roomId)?.user2;
-    // emitting an offer to user2
-    user2?.socket?.emit("offer", {
-      sdp,
+    user2?.socket.emit("send-offer", {
+      roomId,
     });
   }
 
-  // this function sends the answer to the other user which is user1 in this case
-  onAnswer(roomId: string, sdp: string) {
-    const user1 = this.rooms.get(roomId)?.user1;
-    // returns the answer to user1 which is its webRTC configuration in sdp
-    user1?.socket?.emit("offer", {
+  onOffer(roomId: string, sdp: string, senderSocketid: string) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+    const receivingUser =
+      room.user1.socket.id === senderSocketid ? room.user2 : room.user1;
+    receivingUser?.socket.emit("offer", {
       sdp,
+      roomId,
     });
+  }
+
+  onAnswer(roomId: string, sdp: string, senderSocketid: string) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+    const receivingUser =
+      room.user1.socket.id === senderSocketid ? room.user2 : room.user1;
+
+    receivingUser?.socket.emit("answer", {
+      sdp,
+      roomId,
+    });
+  }
+
+  onIceCandidates(
+    roomId: string,
+    senderSocketid: string,
+    candidate: any,
+    type: "sender" | "receiver"
+  ) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+    const receivingUser =
+      room.user1.socket.id === senderSocketid ? room.user2 : room.user1;
+    receivingUser.socket.emit("add-ice-candidate", { candidate, type });
   }
 
   // for generating a random room id

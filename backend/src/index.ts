@@ -1,24 +1,27 @@
-import express, { Request, Response } from "express";
-import cors from "cors";
+import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import { UserManager } from "./managers/UserManager";
 const app = express();
 const port = 3000; // default port to listen
 
 const server = http.createServer(app);
-const io = new Server(server);
-
-
-app.use(cors());
-
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
 });
 
-io.on('connection', (socket) => {
-    console.log('a user connected');
+const userManager = new UserManager();
+
+io.on("connection", (socket) => {
+  // console.log("a user connected"+ socket);
+  userManager.addUser("someUserName", socket);
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+    userManager.removeUser(socket.id);
   });
+});
 
 // start the Express server
 server.listen(port, () => {

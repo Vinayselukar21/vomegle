@@ -26,7 +26,7 @@ const RoomPage = ({
   console.log(SOCKET_SERVER_URL);
   //@ts-ignore
   const [remoteMediaStream, setRemoteMediaStream] =
-  useState<MediaStream | null>(null);
+    useState<MediaStream | null>(null);
   //@ts-ignore
   const [remoteVideoTrack, setRemoteVideoTrack] =
     useState<MediaStreamTrack | null>(null);
@@ -41,25 +41,26 @@ const RoomPage = ({
     const socket = io(SOCKET_SERVER_URL);
 
     socket.on("send-offer", async ({ roomId }: { roomId: string }) => {
-      console.log("Please send the offer");
+      console.log("Send offer to remote", roomId);
       setLobby(false);
 
       const pc = new RTCPeerConnection();
       setSendingPc(pc);
-
+      console.log("---------------------------------- new peer connection" + pc);
       if (localVideoTrack) {
-        console.log("Adding video track");
+        console.log("Adding local video track");
         pc.addTrack(localVideoTrack);
       }
 
       if (localAudioTrack) {
-        console.log("Adding audio track");
+        console.log("Adding local audio track");
         pc.addTrack(localAudioTrack);
       }
-
+      console.log("---------------------------------- get ice candidate");
       pc.onicecandidate = (e) => {
         console.log("receiving ice candidate locally");
         if (e.candidate) {
+          console.log("Sending ice candidate to remote");
           socket.emit("add-ice-candidate", {
             candidate: e.candidate,
             roomId,
@@ -67,11 +68,12 @@ const RoomPage = ({
           });
         }
       };
-
+      console.log("---------------------------------- negotiation");
       pc.onnegotiationneeded = async () => {
-        console.log("Negotiation needed");
         const sdp = await pc.createOffer();
+        console.log("Negotiation needed & offer sent with ssd:" + sdp);
         await pc.setLocalDescription(sdp);
+        console.log("Local description set");
         socket.emit("offer", {
           roomId,
           sdp,
@@ -79,6 +81,7 @@ const RoomPage = ({
       };
     });
 
+    console.log("--------------------------------------Listening for offer");
     socket.on(
       "offer",
       async ({
@@ -88,16 +91,20 @@ const RoomPage = ({
         roomId: string;
         sdp: RTCSessionDescriptionInit;
       }) => {
-        console.log("Please send the answer");
+        console.log("Received offer from remote", roomId);
         setLobby(false);
 
         const pc = new RTCPeerConnection();
+        console.log("---------------------------------- new peer connection while ANSWERING" + pc);
         await pc.setRemoteDescription(remoteSdp);
         const sdp = await pc.createAnswer();
         await pc.setLocalDescription(sdp);
         setReceivingPc(pc);
 
         const remoteStream = new MediaStream();
+
+        console.log("-------------------------------------Remote Stream", remoteStream);
+
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStream;
         }
@@ -154,7 +161,7 @@ const RoomPage = ({
         roomId: string;
         sdp: RTCSessionDescriptionInit;
       }) => {
-        console.log("Connection established", roomId);
+        console.log("Connection established", roomId , remoteSdp);
         setLobby(false);
 
         setSendingPc((pc) => {
@@ -178,7 +185,7 @@ const RoomPage = ({
         candidate: RTCIceCandidateInit;
         type: "sender" | "receiver";
       }) => {
-        console.log("add ice candidate from remote");
+        console.log("_+_++_++_+_+_+__+_+<><><><><><><><<add ice candidate from remote EXCHANGE");
         if (type === "sender") {
           setReceivingPc((pc) => {
             pc?.addIceCandidate(candidate);

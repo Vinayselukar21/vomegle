@@ -12,6 +12,7 @@ export default defineConfig({
         proxy: {
             '/socket.io': {
                 target: "https://vomegle.onrender.com",
+                // target: "http://localhost:3000",
                 ws: true,
             },
         },

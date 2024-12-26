@@ -227,7 +227,7 @@ const RoomPage = ({
           </div>
         )}
         <Card>
-          <CardContent className="grid grid-cols-2 gap-2 p-4 ">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4 ">
             <video autoPlay width={400} height={300} ref={localVideoRef} />
             <video autoPlay width={400} height={300} ref={remoteVideoRef} />
           </CardContent>

@@ -38,13 +38,10 @@ const RoomPage = ({
   const config = {
     iceServers: [
       { urls: "stun:stun.l.google.com:19302" },
-      {
-        urls: "turn:your-turn-server",
-        username: "your-username",
-        credential: "your-credential",
-      },
     ],
   };
+  
+  
   
   useEffect(() => {
     const socket = io(SOCKET_SERVER_URL);

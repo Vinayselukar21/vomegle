@@ -12,7 +12,7 @@ const RoomPage = ({
   localVideoTrack: MediaStreamTrack | null;
   localAudioTrack: MediaStreamTrack | null;
 }) => {
-  const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL
+  const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL;
   //@ts-ignore
   const [socket, setSocket] = useState<Socket | null>(null);
   const [lobby, setLobby] = useState<boolean>(true);
@@ -35,28 +35,33 @@ const RoomPage = ({
 
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const config:RTCConfiguration = {
+  const config: RTCConfiguration = {
     iceServers: [
       {
         urls: "stun:stun.l.google.com:19302",
       },
+      {
+        urls: "turn:openrelay.metered.ca:80",
+        username: "openrelayproject",
+        credential: "openrelayproject",
+      },
     ],
-    iceTransportPolicy: "all", // Optional: Modify if you want to restrict relay/host candidates
+
+    // iceTransportPolicy: "all", // Optional: Modify if you want to restrict relay/host candidates
   };
-  
-  
+
   useEffect(() => {
     const socket = io(SOCKET_SERVER_URL);
-  
+
     // Send offer event
     socket.on("send-offer", async ({ roomId }: { roomId: string }) => {
       console.log("Send offer to remote", roomId);
       setLobby(false);
-  
+
       const pc = new RTCPeerConnection(config);
       setSendingPc(pc);
       console.log("New peer connection", pc);
-  
+
       // Add local tracks to the connection
       if (localVideoTrack) {
         pc.addTrack(localVideoTrack);
@@ -64,7 +69,7 @@ const RoomPage = ({
       if (localAudioTrack) {
         pc.addTrack(localAudioTrack);
       }
-  
+
       // Handle ICE candidates
       pc.onicecandidate = (e) => {
         if (e.candidate) {
@@ -75,7 +80,7 @@ const RoomPage = ({
           });
         }
       };
-  
+
       // Negotiation needed event
       pc.onnegotiationneeded = async () => {
         const offer = await pc.createOffer();
@@ -86,7 +91,7 @@ const RoomPage = ({
         });
       };
     });
-  
+
     // Receive offer event
     socket.on(
       "offer",
@@ -99,23 +104,23 @@ const RoomPage = ({
       }) => {
         console.log("Received offer from remote", roomId);
         setLobby(false);
-  
+
         const pc = new RTCPeerConnection(config);
         setReceivingPc(pc);
-  
+
         const remoteStream = new MediaStream();
         setRemoteMediaStream(remoteStream);
-  
+
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStream;
         }
-  
+
         // Handle incoming tracks
         pc.ontrack = ({ track }) => {
           console.log("Track received:", track.kind);
           remoteStream.addTrack(track); // Add track to remote stream
         };
-  
+
         // Handle ICE candidates
         pc.onicecandidate = (e) => {
           if (e.candidate) {
@@ -126,19 +131,19 @@ const RoomPage = ({
             });
           }
         };
-  
+
         await pc.setRemoteDescription(new RTCSessionDescription(remoteSdp));
-  
+
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
-  
+
         socket.emit("answer", {
           roomId,
           sdp: answer,
         });
       }
     );
-  
+
     // Receive answer event
     socket.on(
       "answer",
@@ -156,7 +161,7 @@ const RoomPage = ({
         });
       }
     );
-  
+
     // Handle ICE candidates
     socket.on(
       "add-ice-candidate",
@@ -180,10 +185,10 @@ const RoomPage = ({
         }
       }
     );
-  
+
     setSocket(socket);
   }, [userName, localVideoTrack, localAudioTrack]);
-  
+
   useEffect(() => {
     if (localVideoRef.current && localVideoTrack) {
       localVideoRef.current.srcObject = new MediaStream([localVideoTrack]);

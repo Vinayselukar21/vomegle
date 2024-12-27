@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { Card, CardContent } from "./ui/card";
 
-// const SOCKET_SERVER_URL = "http://localhost:3000";
 const RoomPage = ({
   userName,
   localVideoTrack,
@@ -36,7 +35,17 @@ const RoomPage = ({
 
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
-
+  const config = {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      {
+        urls: "turn:your-turn-server",
+        username: "your-username",
+        credential: "your-credential",
+      },
+    ],
+  };
+  
   useEffect(() => {
     const socket = io(SOCKET_SERVER_URL);
   
@@ -44,7 +53,7 @@ const RoomPage = ({
       console.log("Send offer to remote", roomId);
       setLobby(false);
   
-      const pc = new RTCPeerConnection();
+      const pc = new RTCPeerConnection(config);
       setSendingPc(pc);
       console.log("New peer connection", pc);
   
@@ -90,7 +99,7 @@ const RoomPage = ({
         console.log("Received offer from remote", roomId);
         setLobby(false);
   
-        const pc = new RTCPeerConnection();
+        const pc = new RTCPeerConnection(config);
         setReceivingPc(pc);
   
         const remoteStream = new MediaStream();

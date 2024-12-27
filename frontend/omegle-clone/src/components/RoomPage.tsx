@@ -35,17 +35,20 @@ const RoomPage = ({
 
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const config = {
+  const config:RTCConfiguration = {
     iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
+      {
+        urls: "stun:stun.l.google.com:19302",
+      },
     ],
+    iceTransportPolicy: "all", // Optional: Modify if you want to restrict relay/host candidates
   };
-  
   
   
   useEffect(() => {
     const socket = io(SOCKET_SERVER_URL);
   
+    // Send offer event
     socket.on("send-offer", async ({ roomId }: { roomId: string }) => {
       console.log("Send offer to remote", roomId);
       setLobby(false);
@@ -84,6 +87,7 @@ const RoomPage = ({
       };
     });
   
+    // Receive offer event
     socket.on(
       "offer",
       async ({
@@ -135,6 +139,7 @@ const RoomPage = ({
       }
     );
   
+    // Receive answer event
     socket.on(
       "answer",
       ({
@@ -152,6 +157,7 @@ const RoomPage = ({
       }
     );
   
+    // Handle ICE candidates
     socket.on(
       "add-ice-candidate",
       ({
@@ -174,7 +180,7 @@ const RoomPage = ({
         }
       }
     );
-
+  
     setSocket(socket);
   }, [userName, localVideoTrack, localAudioTrack]);
   

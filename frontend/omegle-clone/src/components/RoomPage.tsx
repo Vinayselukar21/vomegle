@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import { Card, CardContent } from "./ui/card";
+import { Button } from "./ui/button";
+import { ChevronRight } from "lucide-react";
 
 const RoomPage = ({
   userName,
@@ -13,7 +13,10 @@ const RoomPage = ({
   localAudioTrack: MediaStreamTrack | null;
 }) => {
   const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL;
-  //@ts-ignore
+  const TURN_SERVER_URL = import.meta.env.VITE_TURN_SERVER_URL;
+  const TURN_SERVER_USERNAME = import.meta.env.VITE_TURN_SERVER_USERNAME;
+  const TURN_SERVER_CREDENTIAL = import.meta.env.VITE_TURN_SERVER_CREDENTIAL;
+  // @ts-ignore
   const [socket, setSocket] = useState<Socket | null>(null);
   const [lobby, setLobby] = useState<boolean>(true);
   //@ts-ignore
@@ -35,19 +38,15 @@ const RoomPage = ({
 
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const config: RTCConfiguration = {
+
+  const configuration: RTCConfiguration = {
     iceServers: [
       {
-        urls: "stun:stun.l.google.com:19302",
-      },
-      {
-        urls: "turn:openrelay.metered.ca:80",
-        username: "openrelayproject",
-        credential: "openrelayproject",
+        urls: TURN_SERVER_URL, // Ensure the URL starts with "turn:" for TURN servers
+        username: TURN_SERVER_USERNAME,
+        credential: TURN_SERVER_CREDENTIAL,
       },
     ],
-
-    // iceTransportPolicy: "all", // Optional: Modify if you want to restrict relay/host candidates
   };
 
   useEffect(() => {
@@ -58,7 +57,7 @@ const RoomPage = ({
       console.log("Send offer to remote", roomId);
       setLobby(false);
 
-      const pc = new RTCPeerConnection(config);
+      const pc = new RTCPeerConnection(configuration);
       setSendingPc(pc);
       console.log("New peer connection", pc);
 
@@ -105,7 +104,7 @@ const RoomPage = ({
         console.log("Received offer from remote", roomId);
         setLobby(false);
 
-        const pc = new RTCPeerConnection(config);
+        const pc = new RTCPeerConnection(configuration);
         setReceivingPc(pc);
 
         const remoteStream = new MediaStream();
@@ -197,27 +196,37 @@ const RoomPage = ({
   }, [localVideoRef, localVideoTrack]);
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">
-          Welcome to the Room {userName}
-        </h1>
-        <Link to="/" className="text-blue-500 hover:text-blue-700">
-          Back to Landing Page
-        </Link>
+    <div className="min-h-screen flex flex-col items-center p-4 overflow-scroll">
+      <div className="text-center mb-4">
         {lobby && (
-          <div className="flex justify-center items-center">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold mb-4">Waiting in the lobby</h1>
-            </div>
+          <div className="flex justify-center">
+            <h2 className="text-muted-foreground font-semibold">
+              Waiting in the lobby
+            </h2>
           </div>
         )}
-        <Card>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4 ">
-            <video autoPlay width={400} height={300} ref={localVideoRef} />
-            <video autoPlay width={400} height={300} ref={remoteVideoRef} />
-          </CardContent>
-        </Card>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-4xl justify-center">
+        <div className="flex justify-center w-full h-full">
+          <video
+            autoPlay
+            className="w-full h-full object-cover rounded-lg shadow-md"
+            ref={localVideoRef}
+          />
+        </div>
+        <div className="flex justify-center w-full h-full">
+          <video
+            autoPlay
+            className="w-full h-full object-cover rounded-lg shadow-md"
+            ref={remoteVideoRef}
+          />
+        </div>
+      </div>
+      <div className="flex justify-between w-full max-w-2xl px-4 py-4 mx-auto">
+          <Button className="mb-2 md:mb-0">Exit</Button>
+          <Button>
+            Next <ChevronRight />
+          </Button>
       </div>
     </div>
   );

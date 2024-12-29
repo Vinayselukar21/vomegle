@@ -5,7 +5,6 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,34 +48,38 @@ const LandingPage = () => {
 
   if (!joined) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <Card className="w-[90%] max-w-[350px]">
+      <div className="flex justify-center items-center  p-4">
+        <Card className="w-full max-w-md rounded-lg shadow-lg">
           <CardHeader>
-            <CardTitle>Vomegle</CardTitle>
-            <CardDescription>
-              Start chatting with random people.
+            <CardDescription className="text-lg font-semibold text-center">
+              Your Friendly Space for Video Chats!
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <video autoPlay ref={videoRef}></video>
+          <CardContent className="flex flex-col items-center">
+            <video
+              autoPlay
+              ref={videoRef}
+              className="w-full rounded-lg mb-4"
+            ></video>
             <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="name">Name</Label>
+              <div className="flex flex-col space-y-1.5 w-full">
+                <Label htmlFor="name" className="text-left">
+                  Name
+                </Label>
                 <Input
                   id="name"
-                  placeholder="Name of your project"
+                  placeholder="Enter your name"
                   value={userName}
                   onChange={(e) => {
                     setUserName(e.target.value);
                   }}
+                  className="w-full"
                 />
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <Button
-              onClick={() => setJoined(true)}
-            >
+            <Button onClick={() => setJoined(true)} className="w-full">
               Join
             </Button>
           </CardFooter>

@@ -207,14 +207,14 @@ const RoomPage = ({
         )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-4xl justify-center">
-        <div className="flex justify-center w-full h-full">
+        <div className="flex justify-center w-full md:h-full sm:aspect-square">
           <video
             autoPlay
             className="w-full h-full object-cover rounded-lg shadow-md"
             ref={localVideoRef}
           />
         </div>
-        <div className="flex justify-center w-full h-full">
+        <div className="flex justify-center w-full md:h-full sm:aspect-square">
           <video
             autoPlay
             className="w-full h-full object-cover rounded-lg shadow-md"
